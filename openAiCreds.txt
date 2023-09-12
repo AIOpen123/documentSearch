@@ -1,0 +1,14 @@
+Deployed 2 model TestPoc (gpt-35-turbo) 
+
+Endpoint                              - https://kgsazureai.openai.azure.com/
+Key                                         - 21c32eb89c9a48c784fa2936c059cb6e
+Deployment                     - TestPoc
+                                           text-embadding-ada-002
+
+
+Endpoint                              - https://kgsazureai.openai.azure.com/
+Key                                         - 21c32eb89c9a48c784fa2936c059cb6e
+Deployment                     - TestPoc
+
+
+
