@@ -1,5 +1,6 @@
 # Import necessary packages
-from llama_index import GPTVectorStoreIndex , Document, SimpleDirectoryReader
+from llama_index import GPTVectorStoreIndex , Document, SimpleDirectoryReader, load_index_from_storage
+from llama_index.storage.storage_context import StorageContext
 import os
 import openai
 import requests
@@ -15,29 +16,39 @@ openai.api_version = '2023-03-15-preview'
 deployment_name = 'TestPOC'
 
 
-#send a completion call to generate an answer
-print('Sending a test completion job')
-start_phrase = 'mount everest height'
-response = openai.Completion.create(engine=deployment_name,prompt =start_phrase, max_tokens=10)
-print(response)
+# #send a completion call to generate an answer
+# print('Sending a test completion job')
+# start_phrase = 'what is mount everest height?'
+# response = openai.Completion.create(engine=deployment_name,prompt =start_phrase, max_tokens=100)
+# print(response)
 
 
 
-# # Loading from a directory
-# documents = SimpleDirectoryReader('<<path_to_document_store_directory>>').load_data()
-#
-# # Construct a simple vector index
-# index = GPTVectorStoreIndex(documents)
-#
-# # Save your index to a index.json file
-# index.save_to_disk('<<filename_and_path_for_index_file>>')
-#
-# def bot(<<filename_and_path_for_index_file>>):
-#   index = GPTSimpleVectorIndex.load_from_disk('<<filename_and_path_for_index_file>>')
-#   while True:
-#     input = input(‘How can I help? ‘)
-#     response = vIndex.query(input)
-#     print(f”Response: {response} \n”)
+# Loading from a directory
+documents = SimpleDirectoryReader(r'documentSearch\data').load_data()
+print("document  read successful")
+
+# Construct a simple vector index
+index = GPTVectorStoreIndex.from_documents(documents)
+
+# Save your index to a index.json file
+index.storage_context.persist(persist_dir=r'documentSearch\tranied_index\index1.json')
+
+def bot(indexPath):
+  storage_context = StorageContext.from_defaults(persist_dir=r'documentSearch\tranied_index\index1.json')
+  index = load_index_from_storage(storage_context)
+  query_engine = index.as_query_engine()
+  # index = GPTVectorStoreIndex.load_from_disk(r'documentSearch\tranied_index\index1.json')
+  while True:
+    ip= input('Hi i am Mr.X, how can i help you?')
+    response = query_engine.query(ip)
+
+    # response = index.query(ip)
+    print(f"Response: {response} \n")
+
+bot('documentSearch\tranied_index\index1.json')
+
+
 #
 # def print_hi(name):
 #     # Use a breakpoint in the code line below to debug your script.
