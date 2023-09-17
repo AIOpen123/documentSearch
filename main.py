@@ -1,5 +1,5 @@
 # Import necessary packages
-from llama_index import GPTVectorStoreIndex, VectorStoreIndex , Document, SimpleDirectoryReader, load_index_from_storage, LLMPredictor, PromptHelper
+from llama_index import GPTVectorStoreIndex, download_loader,  VectorStoreIndex , Document, SimpleDirectoryReader, load_index_from_storage, LLMPredictor, PromptHelper
 from llama_index.storage.storage_context import StorageContext
 from langchain.llms import AzureOpenAI
 from langchain.embeddings import OpenAIEmbeddings
@@ -21,15 +21,18 @@ openai.api_type = 'azure'
 openai.api_version = '2023-03-15-preview'
 
 deployment_name = 'TestPoc'
+gpt_model = 'gpt-35-turbo'
+ada_model = "text-embedding-ada-002"
 
-llm = AzureOpenAI(engine = "text-embedding-ada-002", model = "text-embedding-ada-002")
+llm = AzureOpenAI(openai_api_base=openai.api_base, engine = deployment_name, model = gpt_model)
 llm_predictor = LLMPredictor(llm=llm)
 embedding_llm = LangchainEmbedding(OpenAIEmbeddings(model = "text-embedding-ada-002",
 deployment = 'text-embedding-ada-002',
+chunk_size=256, 
 openai_api_key=openai.api_key,
 openai_api_base=openai.api_base,
 openai_api_type=openai.api_type,
-openai_api_version=openai.api_version), embed_batch_size=1)
+openai_api_version=openai.api_version), embed_batch_size=4)
 # #send a completion call to generate an answer
 # print('Sending a test completion job')
 # start_phrase = 'what is mount everest height?'
@@ -53,6 +56,13 @@ service_context = ServiceContext.from_defaults(
 )
 set_global_service_context(service_context)
 # Loading from a directory
+
+# UnstructuredReader = download_loader('UnstructuredReader')
+PDFReader = download_loader("PDFReader")
+dir_reader = SimpleDirectoryReader(r'documentSearch\data', file_extractor={".pdf": PDFReader()})
+documents = dir_reader.load_data()
+print(documents)
+
 documents = SimpleDirectoryReader(r'documentSearch\data').load_data()
 print(documents)
 print("document  read successful")
