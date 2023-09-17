@@ -1,5 +1,5 @@
 # Import necessary packages
-from llama_index import GPTVectorStoreIndex , Document, SimpleDirectoryReader, load_index_from_storage, LLMPredictor, PromptHelper
+from llama_index import GPTVectorStoreIndex, VectorStoreIndex , Document, SimpleDirectoryReader, load_index_from_storage, LLMPredictor, PromptHelper
 from llama_index.storage.storage_context import StorageContext
 from langchain.llms import AzureOpenAI
 from langchain.embeddings import OpenAIEmbeddings
@@ -20,46 +20,57 @@ openai.api_key = '21c32eb89c9a48c784fa2936c059cb6e'
 openai.api_type = 'azure'
 openai.api_version = '2023-03-15-preview'
 
-deployment_name = 'TestPOC'
+deployment_name = 'TestPoc'
 
-llm = AzureOpenAI(engine = deployment_name, model = "text-embadding-ada-002")
+llm = AzureOpenAI(engine = "text-embedding-ada-002", model = "text-embedding-ada-002")
 llm_predictor = LLMPredictor(llm=llm)
-embedding_llm = LangchainEmbedding(OpenAIEmbeddings(model = "text-embadding-ada-002",
-deployment = 'TestPOC',
+embedding_llm = LangchainEmbedding(OpenAIEmbeddings(model = "text-embedding-ada-002",
+deployment = 'text-embedding-ada-002',
 openai_api_key=openai.api_key,
 openai_api_base=openai.api_base,
 openai_api_type=openai.api_type,
-openai_api_version=openai.api_version))
+openai_api_version=openai.api_version), embed_batch_size=1)
 # #send a completion call to generate an answer
 # print('Sending a test completion job')
 # start_phrase = 'what is mount everest height?'
 # response = openai.Completion.create(engine=deployment_name,prompt =start_phrase, max_tokens=100)
 # print(response)
 # Define prompt helper
+context_window = 3000
+chunk_overlap_ratio = 0.5
 max_input_size = 3000
 num_output = 256
 chunk_size_limit = 1000 # token window size per document
 max_chunk_overlap = 20 # overlap for each token fragment
-prompt_helper = PromptHelper()
+prompt_helper = PromptHelper(num_output = num_output, chunk_size_limit = chunk_size_limit, 
+                             chunk_overlap_ratio = chunk_overlap_ratio, context_window = context_window)
 
 from llama_index import set_global_service_context
 service_context = ServiceContext.from_defaults(
     llm=llm,
     embed_model=embedding_llm,
+    prompt_helper = prompt_helper
 )
 set_global_service_context(service_context)
-
 # Loading from a directory
 documents = SimpleDirectoryReader(r'documentSearch\data').load_data()
+print(documents)
 print("document  read successful")
 
 # Construct a simple vector index
-index = GPTVectorStoreIndex.from_documents(documents, model = "TestPOC", llm_predictor=llm_predictor, embed_model=embedding_llm, prompt_helper=prompt_helper)
-query_engine = index.as_query_engine()
+index = GPTVectorStoreIndex.from_documents(documents, model = "text-embedding-ada-002", llm_predictor=llm_predictor, embed_model=embedding_llm, prompt_helper=prompt_helper)
+# index = VectorStoreIndex.from_documents(documents, model = "text-embedding-ada-002", llm_predictor=llm_predictor, embed_model=embedding_llm, prompt_helper=prompt_helper)
+
 ip= input('Hi i am Mr.X, how can i help you?\n')
 print(ip)
+
+query_engine = index.as_query_engine(service_context = service_context)
 response = query_engine.query(ip)
 print(f"Response: {response} \n")
+
+# query_engine = index.as_query_engine(streaming=True)
+# streaming_response = query_engine.query(ip)
+# streaming_response.print_response_stream() 
 
 # # Save your index to a index.json file
 # index.storage_context.persist(persist_dir=r'documentSearch\tranied_index\index1.json')
