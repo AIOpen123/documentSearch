@@ -39,18 +39,18 @@ openai_api_key=openai.api_key,
 openai_api_base=openai.api_base,
 openai_api_type=openai.api_type,
 openai_api_version=openai.api_version), embed_batch_size=4)
-# #send a completion call to generate an answer
+
 # print('Sending a test completion job')
 # start_phrase = 'what is mount everest height?'
 # response = openai.Completion.create(engine=deployment_name,prompt =start_phrase, max_tokens=100)
 # print(response)
-# Define prompt helper
+
 context_window = 3000
 chunk_overlap_ratio = 0.5
 max_input_size = 3000
 num_output = 256
-chunk_size_limit = 1000 # token window size per document
-max_chunk_overlap = 20 # overlap for each token fragment
+chunk_size_limit = 1000 
+max_chunk_overlap = 20 
 prompt_helper = PromptHelper(num_output = num_output, chunk_size_limit = chunk_size_limit, 
                              chunk_overlap_ratio = chunk_overlap_ratio, context_window = context_window)
 
@@ -61,7 +61,7 @@ service_context = ServiceContext.from_defaults(
     prompt_helper = prompt_helper
 )
 set_global_service_context(service_context)
-# Loading from a directory
+
 
 # # UnstructuredReader = download_loader('UnstructuredReader')
 # PDFReader = download_loader("PDFReader")
@@ -70,10 +70,10 @@ set_global_service_context(service_context)
 # print(documents)
 
 documents = SimpleDirectoryReader(r'documentSearch\data').load_data()
-print(documents)
-print("document  read successful")
+# print(documents)
+# print("document  read successful")
 
-# Construct a simple vector index
+
 index = GPTVectorStoreIndex.from_documents(documents, model = "text-embedding-ada-002", llm_predictor=llm_predictor, embed_model=embedding_llm, prompt_helper=prompt_helper)
 # index = VectorStoreIndex.from_documents(documents, model = "text-embedding-ada-002", llm_predictor=llm_predictor, embed_model=embedding_llm, prompt_helper=prompt_helper)
 
@@ -88,7 +88,6 @@ query_engine = index.as_query_engine(service_context = service_context)
 # streaming_response = query_engine.query(ip)
 # streaming_response.print_response_stream() 
 
-# # Save your index to a index.json file
 # index.storage_context.persist(persist_dir=r'documentSearch\tranied_index\index1.json')
 
 #
@@ -125,15 +124,3 @@ while True:
 
 # bot('documentSearch\tranied_index\index1.json')
 
-
-# #
-# # def print_hi(name):
-# #     # Use a breakpoint in the code line below to debug your script.
-# #     print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-# #
-# #
-# # # Press the green button in the gutter to run the script.
-# # if __name__ == '__main__':
-# #     print_hi('PyCharm')
-# #
-# # # See PyCharm help at https://www.jetbrains.com/help/pycharm/
