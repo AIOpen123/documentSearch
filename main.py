@@ -10,6 +10,12 @@ import json
 import os
 import openai
 
+from llama_index.memory import ChatMemoryBuffer
+
+memory = ChatMemoryBuffer.from_defaults(token_limit=1500)
+
+
+
 os.environ['OPENAI_API_BASE'] = 'https://kgsazureai.openai.azure.com/'
 os.environ['OPENAI_API_KEY'] = '21c32eb89c9a48c784fa2936c059cb6e'
 os.environ['OPENAI_API_BASE'] = 'azure'
@@ -57,11 +63,11 @@ service_context = ServiceContext.from_defaults(
 set_global_service_context(service_context)
 # Loading from a directory
 
-# UnstructuredReader = download_loader('UnstructuredReader')
-PDFReader = download_loader("PDFReader")
-dir_reader = SimpleDirectoryReader(r'documentSearch\data', file_extractor={".pdf": PDFReader()})
-documents = dir_reader.load_data()
-print(documents)
+# # UnstructuredReader = download_loader('UnstructuredReader')
+# PDFReader = download_loader("PDFReader")
+# dir_reader = SimpleDirectoryReader(r'documentSearch\data', file_extractor={".pdf": PDFReader()})
+# documents = dir_reader.load_data()
+# print(documents)
 
 documents = SimpleDirectoryReader(r'documentSearch\data').load_data()
 print(documents)
@@ -71,12 +77,12 @@ print("document  read successful")
 index = GPTVectorStoreIndex.from_documents(documents, model = "text-embedding-ada-002", llm_predictor=llm_predictor, embed_model=embedding_llm, prompt_helper=prompt_helper)
 # index = VectorStoreIndex.from_documents(documents, model = "text-embedding-ada-002", llm_predictor=llm_predictor, embed_model=embedding_llm, prompt_helper=prompt_helper)
 
-ip= input('Hi i am Mr.X, how can i help you?\n')
-print(ip)
+# ip= input('Hi i am Mr.X, how can i help you?\n')
+# print(ip)
 
 query_engine = index.as_query_engine(service_context = service_context)
-response = query_engine.query(ip)
-print(f"Response: {response} \n")
+# response = query_engine.query(ip)
+# print(f"Response: {response} \n")
 
 # query_engine = index.as_query_engine(streaming=True)
 # streaming_response = query_engine.query(ip)
@@ -85,7 +91,7 @@ print(f"Response: {response} \n")
 # # Save your index to a index.json file
 # index.storage_context.persist(persist_dir=r'documentSearch\tranied_index\index1.json')
 
-# def bot(indexPath):
+#
 #   storage_context = StorageContext.from_defaults(persist_dir=r'documentSearch\tranied_index\index1.json')
 #   index = load_index_from_storage(storage_context)
 #   query_engine = index.as_query_engine()
@@ -96,6 +102,26 @@ print(f"Response: {response} \n")
 
 #     # response = index.query(ip)
 #     print(f"Response: {response} \n")
+
+
+chat_engine = index.as_chat_engine(
+    chat_mode="context",
+    memory=memory,
+    system_prompt="You are a chatbot, able to have normal interactions",
+)
+print("Bot: how can i assist you?")
+while True:
+    ip = input("user prompt:")
+    # response = chat_engine.chat(ip)
+    # print(response)
+    response = query_engine.query(ip)
+    print(f"Bot: {response} \n")
+
+# while True:
+#   ip= input('Hi i am Mr.X, how can i help you?\n')
+#   print(ip)
+#   response = query_engine.query(ip)
+#   print(f"Response: {response} \n")
 
 # bot('documentSearch\tranied_index\index1.json')
 
