@@ -48,7 +48,7 @@ openai_api_version=openai.api_version), embed_batch_size=4)
 context_window = 3000
 chunk_overlap_ratio = 0.5
 max_input_size = 3000
-num_output = 256
+num_output = 1
 chunk_size_limit = 1000 
 max_chunk_overlap = 20 
 prompt_helper = PromptHelper(num_output = num_output, chunk_size_limit = chunk_size_limit, 
@@ -80,7 +80,7 @@ index = GPTVectorStoreIndex.from_documents(documents, model = "text-embedding-ad
 # ip= input('Hi i am Mr.X, how can i help you?\n')
 # print(ip)
 
-query_engine = index.as_query_engine(service_context = service_context)
+# query_engine = index.as_query_engine(service_context = service_context)
 # response = query_engine.query(ip)
 # print(f"Response: {response} \n")
 
@@ -108,13 +108,18 @@ chat_engine = index.as_chat_engine(
     memory=memory,
     system_prompt="You are a chatbot, able to have normal interactions",
 )
+# uncomment 83 for commenting this
+query_engine = index.as_query_engine( similarity_top_k=5, response_mode="no_text" ) 
 print("Bot: how can i assist you?")
 while True:
-    ip = input("user prompt:")
+    # ip = input("user prompt:")
     # response = chat_engine.chat(ip)
     # print(response)
-    response = query_engine.query(ip)
-    print(f"Bot: {response} \n")
+    # response = query_engine.query(ip)
+    # print(f"Bot: {response[0]} \n")
+    
+    init_response = query_engine.query("your query") 
+    resp_nodes = [n.node for n in init_response.source_nodes]
 
 # while True:
 #   ip= input('Hi i am Mr.X, how can i help you?\n')

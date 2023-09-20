@@ -2,7 +2,7 @@ import pypdf
  
 #create file object variable
 #opening method will be rb
-pdffileobj=open(r"documentSearch\data\jan4.pdf",'rb')
+pdffileobj=open(r"C:\Users\rahulr6\Desktop\document_search_demo\documentSearch\data\sample.pdf",'rb')
  
 #create reader variable that will read the pdffileobj
 pdfreader=pypdf.PdfReader(pdffileobj)
@@ -24,7 +24,7 @@ text=pageobj.extract_text()
 #go to the file location copy the path by right clicking on the file
 #click properties and copy the location path and paste it here.
 #put "\\your_txtfilename"
-file1=open(r"documentSearch\data\jan4.txt","a")
+file1=open(r"C:\Users\rahulr6\Desktop\document_search_demo\documentSearch\data\sample.txt","a")
 file1.writelines(text)
 file1.close()
 print("completed")
